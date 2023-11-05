@@ -57,4 +57,12 @@ export class UserService {
         };
         return await this.userRepository.updateUser(id, updatedUser);
     }
+
+    async deleteUser(id: number): Promise<void> {
+        const existingUser = await this.userRepository.getUserById(id);
+        if(!existingUser){
+            throw new Error('User not found');
+        }
+        await this.userRepository.deleteUser(id);
+    }
 }

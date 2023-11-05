@@ -28,7 +28,7 @@ export class UserRepositoryPostgres implements IUserRepository {
             const {nickname, firstname, lastname, password} = user;
             const hashedPassword = await this.hashPassword(password);
 
-            const query = 'INSERT INTO users (nickname, first_name, last_name, password) VALUES ($1, $2, $3, $4) RETURNING *';
+            const query = 'INSERT INTO users (nickname, first_name, last_name, password, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *';
             const values = [nickname, firstname, lastname, hashedPassword];
 
             const result: QueryResult = await client.query(query, values);
@@ -47,7 +47,7 @@ export class UserRepositoryPostgres implements IUserRepository {
     async getUserById(id: number): Promise<IUserModel | null>{
         const client: PoolClient = await this.pool.connect();
         try {
-            const query = 'SELECT * FROM users WHERE id = $1';
+            const query = 'SELECT * FROM users WHERE id = $1 AND is_deleted = false';
             const result: QueryResult = await client.query(query, [id]);
 
             if (result.rows.length > 0){
@@ -68,7 +68,7 @@ export class UserRepositoryPostgres implements IUserRepository {
     async getUserByNickname(nickname:string): Promise<IUserModel | null>{
         const client: PoolClient = await this.pool.connect();
         try {
-            const query = 'SELECT * FROM users WHERE nickname = $1';
+            const query = 'SELECT * FROM users WHERE nickname = $1 and is_deleted = false';
             const result: QueryResult = await client.query(query, [nickname]);
 
             if (result.rows.length > 0) {
@@ -93,7 +93,7 @@ export class UserRepositoryPostgres implements IUserRepository {
             const {nickname, firstname, lastname, password} = updates;
             const hashedPassword = password ? await this.hashPassword(password) : undefined;
 
-            const query = 'UPDATE users SET nickname = COALESCE($2, nickname), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), password = COALESCE($5, password) WHERE id = $1 RETURNING *';
+            const query = 'UPDATE users SET nickname = COALESCE($2, nickname), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), password = COALESCE($5, password), updated_at = NOW() WHERE id = $1 RETURNING *';
             const values = [id, nickname, firstname, lastname, hashedPassword];
 
             const result: QueryResult = await client.query(query, values);
@@ -132,11 +132,23 @@ export class UserRepositoryPostgres implements IUserRepository {
         const client: PoolClient = await this.pool.connect();
         const hashedPassword = await this.hashPassword(password);
         try {
-            const query = 'SELECT * FROM users WHERE nickname = $1 AND password = $2';
+            const query = 'SELECT * FROM users WHERE nickname = $1 AND password = $2 AND is_deleted = false';
             const values = [username, hashedPassword];
 
             const result: QueryResult = await client.query(query, values);
             return result.rows.length > 0;
+        }
+        finally {
+            client.release();
+        }
+    }
+
+    async deleteUser(id: number): Promise<void> {
+        const client: PoolClient = await this.pool.connect();
+        try {
+            const query = 'UPDATE users SET deleted_at = NOW(), is_deleted = true WHERE id = $1';
+            const values = [id];
+            await client.query(query, values);
         }
         finally {
             client.release();

@@ -15,6 +15,7 @@ const userController = new UserController(userService);
 app.post('/users', userController.createUser.bind(userController));
 app.get('/users/:id', userController.getUserById.bind(userController));
 app.put('/users/:id',basicAuth, userController.updateUser.bind(userController));
+app.delete('/users/:id', basicAuth, userController.deleteUser.bind(userController));
 
 const PORT = 3000;
 app.listen(PORT, () => {

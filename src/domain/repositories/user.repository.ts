@@ -9,4 +9,5 @@ export interface IUserRepository {
     getUserById(id: number): Promise<IUserModel | null>;
     getUserByNickname(nickname: string): Promise<IUserModel | null>;
     updateUser(id: number, updates: Partial<IUserModel>): Promise<IUserModel | null>;
+    deleteUser(id: number): Promise<void>;
 }
