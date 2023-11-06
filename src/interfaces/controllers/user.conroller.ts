@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { UserService } from "../../domain/services/user.service";
+import jwt from "jsonwebtoken";
+import {UserRepositoryPostgres} from "../../infrastructure/persistance/user.repository.postgres";
+import {JWT_SECRET_KEY} from "../config";
 
 /**
  * @class - controller for users
@@ -57,6 +60,15 @@ export class UserController {
      */
     async updateUser(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.id, 10);
+
+        // @ts-ignore
+        const loggedInUserId = req.user.id;
+        // @ts-ignore
+        const loggedInUserRole = req.user.role;
+        if(userId !== loggedInUserId && loggedInUserRole !== 'moderator' && loggedInUserRole !== 'admin'){
+            res.status(403).json({error: "Forbidden"});
+        }
+
         const ifUnmodifiedSinceHeader = req.headers['if-unmodified-since'];
         try {
             const user = await this.userService.getUserById(userId);
@@ -93,6 +105,15 @@ export class UserController {
 
     async deleteUser(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.id, 10);
+
+        // @ts-ignore
+        const loggedInUserId = req.user.id;
+        // @ts-ignore
+        const loggedInUserRole = req.user.role;
+        if(userId !== loggedInUserId && loggedInUserRole !== 'admin'){
+            res.status(403).json({error: "Forbidden"});
+        }
+
         try {
             await this.userService.deleteUser(userId);
             res.status(204).send();
@@ -100,6 +121,19 @@ export class UserController {
         catch (error) {
             // @ts-ignore
             res.status(500).json({error: error.message});
+        }
+    }
+
+    async loginUser(req: Request, res: Response): Promise<void> {
+        const { nickname, password } = req.body;
+        const user = await this.userService.getUserByNickname(nickname);
+        const isValidCredentials = await new UserRepositoryPostgres().isValidUser(nickname, password);
+        if(user && isValidCredentials) {
+            const token = jwt.sign({id: user.id, role: user.role}, JWT_SECRET_KEY, {expiresIn: '24h'});
+            res.status(200).json({token});
+        }
+        else {
+            res.status(401).json({error: 'Invalid credentials'});
         }
     }
 }
