@@ -1,5 +1,8 @@
-import { Request,Response,NextFunction } from "express";
-import { UserRepositoryPostgres } from "../../infrastructure/persistance/user.repository.postgres";
+import {NextFunction, Request, Response} from "express";
+import jwt from "jsonwebtoken";
+import {JWT_SECRET_KEY} from "../config";
+import {UserRoles} from "../../domain/models/roles.enum";
+import {HttpMessage, HttpStatus} from "../config/http.status";
 
 /**
  * Middleware for auth
@@ -8,21 +11,18 @@ import { UserRepositoryPostgres } from "../../infrastructure/persistance/user.re
  * @param res
  * @param next
  */
-export async function basicAuth(req: Request, res: Response, next: NextFunction) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-        return res.status(401).json({message: 'Access denied!'});
+export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(HttpStatus.UNAUTHORIZED).json({message: HttpMessage.UNAUTHORIZED});
     }
 
-    const base64Credentials = authHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-    const [username, password] = credentials.split(':');
-    const isValid = await new UserRepositoryPostgres().isValidUser(username, password);
-
-    if (isValid) {
+    try {
+        // @ts-ignore
+        req.user = jwt.verify(token, JWT_SECRET_KEY) as { id: number, role: UserRoles };
         next();
     }
-    else {
-        res.status(401).json({message: 'Invalid credentials!'});
+    catch (error) {
+        res.status(HttpStatus.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
     }
 }

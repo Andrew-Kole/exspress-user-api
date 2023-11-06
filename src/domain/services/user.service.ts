@@ -34,6 +34,10 @@ export class UserService {
         return await this.userRepository.getUserById(id);
     }
 
+    async getUserByNickname(nickname: string): Promise<IUserModel | null>{
+        return await this.userRepository.getUserByNickname(nickname);
+    }
+
     /**
      * updating user info
      * @param id - id in db
