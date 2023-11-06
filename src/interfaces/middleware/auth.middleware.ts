@@ -1,6 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import {JWT_SECRET_KEY} from "../config";
+import {UserRoles} from "../../domain/models/roles.enum";
+import {HttpMessage, HttpStatus} from "../config/http.status";
 
 /**
  * Middleware for auth
@@ -12,15 +14,15 @@ import {JWT_SECRET_KEY} from "../config";
 export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({message: 'Access denied!'});
+        return res.status(HttpStatus.UNAUTHORIZED).json({message: HttpMessage.UNAUTHORIZED});
     }
 
     try {
         // @ts-ignore
-        req.user = jwt.verify(token, JWT_SECRET_KEY) as { id: number, role: 'basic' | 'moderator' | 'admin' };
+        req.user = jwt.verify(token, JWT_SECRET_KEY) as { id: number, role: UserRoles };
         next();
     }
     catch (error) {
-        res.status(401).json({error: "Invalid token"});
+        res.status(HttpStatus.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
     }
 }

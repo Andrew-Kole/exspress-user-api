@@ -3,6 +3,7 @@ import { UserService } from "../../domain/services/user.service";
 import jwt from "jsonwebtoken";
 import {UserRepositoryPostgres} from "../../infrastructure/persistance/user.repository.postgres";
 import {JWT_SECRET_KEY} from "../config";
+import {HttpMessage, HttpStatus} from "../config/http.status";
 
 /**
  * @class - controller for users
@@ -20,11 +21,11 @@ export class UserController {
         try {
             const { nickname, firstname, lastname, password } = req.body;
             const user = await this.userService.createUser({ nickname, firstname, lastname, password });
-            res.status(201).json(user);
+            res.status(HttpStatus.CREATED).json(user);
         }
         catch (error) {
             // @ts-ignore
-            res.status(400).json({error: error.message});
+            res.status(HttpStatus.BAD_REQUEST).json({error: error.message});
         }
     }
 
@@ -40,15 +41,15 @@ export class UserController {
             const user = await this.userService.getUserById(userId);
             if(user) {
                 res.setHeader('Last_Modified', user.updated_at?.toUTCString() || '');
-                res.status(200).json(user);
+                res.status(HttpStatus.OK).json(user);
             }
             else {
-                res.status(404).json({error: 'User not found'});
+                res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(500).json({error: error.message});
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -61,21 +62,13 @@ export class UserController {
     async updateUser(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.id, 10);
 
-        // @ts-ignore
-        const loggedInUserId = req.user.id;
-        // @ts-ignore
-        const loggedInUserRole = req.user.role;
-        if(userId !== loggedInUserId && loggedInUserRole !== 'moderator' && loggedInUserRole !== 'admin'){
-            res.status(403).json({error: "Forbidden"});
-        }
-
         const ifUnmodifiedSinceHeader = req.headers['if-unmodified-since'];
         try {
             const user = await this.userService.getUserById(userId);
             if (user){
                 // @ts-ignore
                 if (ifUnmodifiedSinceHeader && new Date(ifUnmodifiedSinceHeader) < user.updated_at){
-                    res.status(412).json({error: 'Precondition Failed'});
+                    res.status(HttpStatus.PRECONDITION_FAILED).json({error: HttpMessage.PRECONDITION_FAILED});
                 }
                 else {
                     const { nickname, firstname, lastname, password } = req.body;
@@ -86,41 +79,33 @@ export class UserController {
                         password,
                     });
                     if(updatedUser) {
-                        res.status(200).json(updatedUser);
+                        res.status(HttpStatus.OK).json(updatedUser);
                     }
                     else {
-                        res.status(404).json({error: 'User not found'});
+                        res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
                     }
                 }
             }
             else {
-                res.status(404).json({error: 'User not found'});
+                res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(500).json({ error:error.message });
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error:error.message });
         }
     }
 
     async deleteUser(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.id, 10);
 
-        // @ts-ignore
-        const loggedInUserId = req.user.id;
-        // @ts-ignore
-        const loggedInUserRole = req.user.role;
-        if(userId !== loggedInUserId && loggedInUserRole !== 'admin'){
-            res.status(403).json({error: "Forbidden"});
-        }
-
         try {
             await this.userService.deleteUser(userId);
-            res.status(204).send();
+            res.status(HttpStatus.NO_CONTENT).send();
         }
         catch (error) {
             // @ts-ignore
-            res.status(500).json({error: error.message});
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -130,10 +115,10 @@ export class UserController {
         const isValidCredentials = await new UserRepositoryPostgres().isValidUser(nickname, password);
         if(user && isValidCredentials) {
             const token = jwt.sign({id: user.id, role: user.role}, JWT_SECRET_KEY, {expiresIn: '24h'});
-            res.status(200).json({token});
+            res.status(HttpStatus.OK).json({token});
         }
         else {
-            res.status(401).json({error: 'Invalid credentials'});
+            res.status(HttpStatus.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
         }
     }
 }
