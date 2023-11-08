@@ -9,6 +9,18 @@ export class VotesService {
         if (voteValue !== 1 && voteValue !== -1) {
             throw new Error('Invalid vote value');
         }
+        if(authenticatedUserId === profileId){
+            throw new Error('You cannot vote for yourself');
+        }
+        const hasVotedForProfile = await this.hasVotedForProfile(authenticatedUserId, profileId);
+        if(hasVotedForProfile) {
+            throw new Error('You have already voted for this profile');
+        }
+        const hasVotedRecently = await this.hasVotedRecently(authenticatedUserId);
+        if(hasVotedRecently){
+            throw new Error('You cannot vote more than once an hour')
+        }
+
         const vote: IVotesModel = {
             voterId: authenticatedUserId,
             profileId: profileId,
@@ -29,17 +41,11 @@ export class VotesService {
         if (!existingVote){
             throw new Error('This vote does not exist');
         }
-        //@ts-ignore
-        if (existingVote.vote_value !== voteValue && (voteValue == 1 || voteValue == -1)){
-            // @ts-ignore
-            const profileId = existingVote.profile_id;
-            const updatedRatingValue = voteValue * 2;
-            await this.userRepository.updateRating(profileId, updatedRatingValue);
-            return await this.votesRepository.updateVote(voteId, voteValue);
-        }
-        else {
-            throw new Error('Invalid vote value or you have not change it');
-        }
+        // @ts-ignore
+        const profileId = existingVote.profile_id;
+        const updatedRatingValue = voteValue * 2;
+        await this.userRepository.updateRating(profileId, updatedRatingValue);
+        return await this.votesRepository.updateVote(voteId, voteValue);
     }
 
     async deleteVote(voteId: number): Promise<void> {

@@ -27,7 +27,7 @@ app.put('/users/:id', jwtAuth, roleCheck([UserRoles.Moderator, UserRoles.Admin])
 app.delete('/users/:id', jwtAuth, roleCheck([UserRoles.Admin]), userController.deleteUser.bind(userController));
 app.post('/login', userController.loginUser.bind(userController));
 app.post('/users/:id/vote', jwtAuth, votesValidator, voteController.createVote.bind(voteController));
-app.put('/vote/:vote_id', jwtAuth, checkOwnership, voteController.updateVote.bind(voteController));
+app.put('/vote/:vote_id', jwtAuth, checkOwnership, votesValidator, voteController.updateVote.bind(voteController));
 app.delete('/vote/:vote_id', jwtAuth, checkOwnership, voteController.deleteVote.bind(voteController));
 app.get('/vote/:vote_id', voteController.getVoteById.bind(voteController))
 
