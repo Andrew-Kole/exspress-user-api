@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRoles } from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../config/http.status";
+import { UserRoles } from "../../../domain/models/roles.enum";
+import {HttpMessage, HttpStatus} from "../../config/http.status";
 
 export function roleCheck(allowedRoles: UserRoles[]){
     return async (req: Request, res: Response, next: NextFunction) => {

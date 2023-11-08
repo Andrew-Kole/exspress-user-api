@@ -154,4 +154,21 @@ export class UserRepositoryPostgres implements IUserRepository {
             client.release();
         }
     }
+
+    async updateRating(id: number, ratingValue: number): Promise<void> {
+        const client: PoolClient = await this.pool.connect();
+        try {
+            const existingRatingQuery = 'SELECT rating FROM users WHERE id = $1';
+            const existingRatingResult: QueryResult = await client.query(existingRatingQuery, [id]);
+            const existingRatingValue: number = existingRatingResult.rows[0].rating;
+            const updatedRatingValue = existingRatingValue + ratingValue;
+
+            const updateRatingQuery = 'UPDATE users SET rating = $1 WHERE id = $2';
+            const updateRatingValues = [updatedRatingValue, id];
+            await client.query(updateRatingQuery, updateRatingValues);
+        }
+        finally {
+            client.release();
+        }
+    }
 }

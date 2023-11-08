@@ -15,6 +15,4 @@ export enum HttpMessage {
     FORBIDDEN = 'You have no right for this action',
     PRECONDITION_FAILED = 'Precondition failed',
     UNAUTHORIZED = 'You have to authorize.',
-
-
 }
