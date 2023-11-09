@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import {VotesService} from "../../domain/services/votes.service";
 import {HttpStatus} from "../config/http.status";
+import {validateVoteValue} from "./validators/votes.validator";
+import {voteValueSchema} from "./validators/schemas/validation.schemas";
 
 export class VotesController{
     constructor(private voteService: VotesService) {}
@@ -11,6 +13,11 @@ export class VotesController{
             const voterId = req.user.id;
             const profileId = parseInt(req.params.id, 10);
             const {voteValue} = req.body;
+            const isValidVoteValue = await validateVoteValue(voteValue, voteValueSchema);
+            if (!isValidVoteValue) {
+                res.status(HttpStatus.BAD_REQUEST).json({error: 'Vote value must be 1 or -1'});
+                return;
+            }
             const vote = await this.voteService.createVote(voterId, profileId, voteValue);
             res.status(HttpStatus.CREATED).json({vote})
         }
@@ -23,6 +30,18 @@ export class VotesController{
     async updateVote(req: Request, res: Response): Promise<void> {
         const voteId = parseInt(req.params.vote_id, 10);
         const { voteValue } = req.body;
+        const isValidVoteValue = await validateVoteValue(voteValue, voteValueSchema);
+        const existingVote = await this.voteService.getVoteById(voteId);
+        // @ts-ignore
+        const existingVoteValue = existingVote.vote_value;
+        if (!isValidVoteValue) {
+            res.status(HttpStatus.BAD_REQUEST).json({error: 'Vote value must be 1 or -1'});
+            return;
+        }
+        if (existingVoteValue === voteValue) {
+            res.status(HttpStatus.BAD_REQUEST).json({error: 'I didnot change anything'});
+            return;
+        }
         try {
             const updatedVote = await this.voteService.updateVote(voteId, voteValue);
             if (updatedVote) {
