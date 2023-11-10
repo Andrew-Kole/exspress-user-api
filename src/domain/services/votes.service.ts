@@ -1,24 +1,25 @@
 import {IVotesRepository} from "../repositories/votes.repository";
 import {IUserRepository} from "../repositories/user.repository";
 import {IVotesModel} from "../models/votes.model";
+import {DoubleVoteError, SelfVoteError, VotedRecentlyError, VoteNotFoundError} from "../../application/exceptions";
+
+const PROFILE_RATING_MULTIPLIER_AFTER_UPDATE = 2;
+const PROFILE_RATING_MULTIPLIER_AFTER_DELETE = -1;
 
 export class VotesService {
     constructor(private votesRepository: IVotesRepository, private userRepository: IUserRepository) {}
 
     async createVote(authenticatedUserId: number, profileId: number, voteValue: number): Promise<IVotesModel> {
-        if (voteValue !== 1 && voteValue !== -1) {
-            throw new Error('Invalid vote value');
-        }
         if(authenticatedUserId === profileId){
-            throw new Error('You cannot vote for yourself');
+            throw new SelfVoteError();
         }
         const hasVotedForProfile = await this.hasVotedForProfile(authenticatedUserId, profileId);
         if(hasVotedForProfile) {
-            throw new Error('You have already voted for this profile');
+            throw new DoubleVoteError();
         }
         const hasVotedRecently = await this.hasVotedRecently(authenticatedUserId);
         if(hasVotedRecently){
-            throw new Error('You cannot vote more than once an hour')
+            throw new VotedRecentlyError();
         }
 
         const vote: IVotesModel = {
@@ -35,11 +36,11 @@ export class VotesService {
     async updateVote(voteId: number, voteValue: number): Promise<IVotesModel | null> {
         const existingVote = await this.votesRepository.getVoteById(voteId);
         if (!existingVote){
-            throw new Error('This vote does not exist');
+            throw new VoteNotFoundError(voteId);
         }
         // @ts-ignore
         const profileId = existingVote.profile_id;
-        const updatedRatingValue = voteValue * 2;
+        const updatedRatingValue = voteValue * PROFILE_RATING_MULTIPLIER_AFTER_UPDATE;
         await this.userRepository.updateRating(profileId, updatedRatingValue);
         return await this.votesRepository.updateVote(voteId, voteValue);
     }
@@ -47,12 +48,12 @@ export class VotesService {
     async deleteVote(voteId: number): Promise<void> {
         const existingVote = await this.votesRepository.getVoteById(voteId);
         if(!existingVote){
-            throw new Error('Vote was not found');
+            throw new VoteNotFoundError(voteId);
         }
         // @ts-ignore
         const profileId = existingVote.profile_id;
         // @ts-ignore
-        const voteValue = existingVote.vote_value * -1;
+        const voteValue = existingVote.vote_value * PROFILE_RATING_MULTIPLIER_AFTER_DELETE;
         await this.votesRepository.deleteVote(voteId);
         await this.userRepository.updateRating(profileId, voteValue);
     }
