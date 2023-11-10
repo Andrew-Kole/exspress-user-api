@@ -7,7 +7,7 @@ import {connectionDBParams} from "./config/connection.params";
 /**
  * @class - UserRepository in postgers
  */
-export class UserRepositoryPostgres implements IUserRepository {
+export class UserRepository implements IUserRepository {
     private pool: Pool;
 
     /**

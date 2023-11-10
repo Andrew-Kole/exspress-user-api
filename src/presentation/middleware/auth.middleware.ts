@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
-import {JWT_SECRET_KEY} from "../config";
+import {JWT_SECRET_KEY} from "../config/jwt.config";
 import {UserRoles} from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../config/http.status";
+import {HttpMessage, HttpStatus} from "../../application/dto/http.status";
 
 /**
  * Middleware for auth

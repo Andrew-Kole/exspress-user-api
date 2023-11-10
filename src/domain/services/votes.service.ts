@@ -32,10 +32,6 @@ export class VotesService {
         return createdVote;
     }
 
-    async getVotesByVoterId(voterId: number): Promise<IVotesModel | null> {
-        return await this.votesRepository.getVotesByVoterId(voterId);
-    }
-
     async updateVote(voteId: number, voteValue: number): Promise<IVotesModel | null> {
         const existingVote = await this.votesRepository.getVoteById(voteId);
         if (!existingVote){
@@ -75,12 +71,6 @@ export class VotesService {
             return lastVote.createdAt > oneHourAgo;
         }
         return false;
-    }
-
-    async isVoteOwner(authenticatedUserId: number, voteId: number): Promise<boolean> {
-        const vote = await this.votesRepository.getVoteById(voteId);
-        // @ts-ignore
-        return !!(vote && vote.voter_id === authenticatedUserId);
     }
 
     async getVoteById(voteId: number): Promise<IVotesModel | null> {

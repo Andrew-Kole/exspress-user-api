@@ -3,7 +3,7 @@ import { IVotesModel } from "../../domain/models/votes.model";
 import { IVotesRepository } from "../../domain/repositories/votes.repository";
 import {connectionDBParams} from "./config/connection.params";
 
-export class VotesRepositoryPostgres implements IVotesRepository {
+export class VotesRepository implements IVotesRepository {
     private pool: Pool;
 
     constructor() {
