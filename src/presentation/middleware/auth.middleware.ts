@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import {JWT_SECRET_KEY} from "../config/jwt.config";
 import {UserRoles} from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../../application/dto/http.status";
+import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 
 /**
  * Middleware for auth

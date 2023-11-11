@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import {VotesService} from "../../domain/services/votes.service";
-import {HttpStatus} from "../../application/dto/http.status";
+import {HttpStatus} from "../../application/enums/http.status";
 
 export class VotesController{
     constructor(private voteService: VotesService) {}

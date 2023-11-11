@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRoles } from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../../application/dto/http.status";
+import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 
 export function rolesMiddleware(allowedRoles: UserRoles[]){
     return async (req: Request, res: Response, next: NextFunction) => {

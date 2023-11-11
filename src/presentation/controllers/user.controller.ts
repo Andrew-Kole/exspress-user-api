@@ -3,7 +3,7 @@ import { UserService } from "../../domain/services/user.service";
 import jwt from "jsonwebtoken";
 import {UserRepository} from "../../infrastructure/persistance/user.repository";
 import {JWT_SECRET_KEY} from "../config/jwt.config";
-import {HttpMessage, HttpStatus} from "../../application/dto/http.status";
+import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 
 /**
  * @class - controller for users

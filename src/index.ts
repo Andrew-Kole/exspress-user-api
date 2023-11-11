@@ -10,7 +10,8 @@ import {VotesRepository} from "./infrastructure/persistance/votes.repository";
 import {VotesService} from "./domain/services/votes.service";
 import {VotesController} from "./presentation/controllers/votes.controller";
 import { checkOwnership} from "./presentation/middleware/service/vote.ownership.middleware";
-import {validateVoteValueMiddleware} from "./presentation/middleware/validation/votevalue.middleware";
+import {validate} from "./presentation/middleware/validation.middleware";
+import {voteValueSchema} from "./application/validators/schemas/validation.schemas";
 
 const app = express();
 app.use(bodyParser.json());
@@ -27,8 +28,8 @@ app.get('/users/:id', userController.getUserById.bind(userController));
 app.put('/users/:id', jwtAuth, rolesMiddleware([UserRoles.Moderator, UserRoles.Admin]), userController.updateUser.bind(userController));
 app.delete('/users/:id', jwtAuth, rolesMiddleware([UserRoles.Admin]), userController.deleteUser.bind(userController));
 app.post('/login', userController.loginUser.bind(userController));
-app.post('/users/:id/vote', jwtAuth, validateVoteValueMiddleware, voteController.createVote.bind(voteController));
-app.put('/vote/:vote_id', jwtAuth,validateVoteValueMiddleware, checkOwnership, voteController.updateVote.bind(voteController));
+app.post('/users/:id/vote', jwtAuth, validate(voteValueSchema), voteController.createVote.bind(voteController));
+app.put('/vote/:vote_id', jwtAuth,validate(voteValueSchema), checkOwnership, voteController.updateVote.bind(voteController));
 app.delete('/vote/:vote_id', jwtAuth, checkOwnership, voteController.deleteVote.bind(voteController));
 app.get('/vote/:vote_id', voteController.getVoteById.bind(voteController))
 
