@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRoles } from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../config/http.status";
+import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 
-export function roleCheck(allowedRoles: UserRoles[]){
+export function rolesMiddleware(allowedRoles: UserRoles[]){
     return async (req: Request, res: Response, next: NextFunction) => {
         //@ts-ignore
         const loggedInUserRole = req.user.role;

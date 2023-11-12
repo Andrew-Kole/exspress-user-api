@@ -7,7 +7,7 @@ import {connectionDBParams} from "./config/connection.params";
 /**
  * @class - UserRepository in postgers
  */
-export class UserRepositoryPostgres implements IUserRepository {
+export class UserRepository implements IUserRepository {
     private pool: Pool;
 
     /**
@@ -149,6 +149,23 @@ export class UserRepositoryPostgres implements IUserRepository {
             const query = 'UPDATE users SET deleted_at = NOW(), is_deleted = true WHERE id = $1';
             const values = [id];
             await client.query(query, values);
+        }
+        finally {
+            client.release();
+        }
+    }
+
+    async updateRating(id: number, ratingValue: number): Promise<void> {
+        const client: PoolClient = await this.pool.connect();
+        try {
+            const existingRatingQuery = 'SELECT rating FROM users WHERE id = $1';
+            const existingRatingResult: QueryResult = await client.query(existingRatingQuery, [id]);
+            const existingRatingValue: number = existingRatingResult.rows[0].rating;
+            const updatedRatingValue = existingRatingValue + ratingValue;
+
+            const updateRatingQuery = 'UPDATE users SET rating = $1 WHERE id = $2';
+            const updateRatingValues = [updatedRatingValue, id];
+            await client.query(updateRatingQuery, updateRatingValues);
         }
         finally {
             client.release();

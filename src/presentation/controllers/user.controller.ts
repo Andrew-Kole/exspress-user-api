@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { UserService } from "../../domain/services/user.service";
 import jwt from "jsonwebtoken";
-import {UserRepositoryPostgres} from "../../infrastructure/persistance/user.repository.postgres";
-import {JWT_SECRET_KEY} from "../config";
-import {HttpMessage, HttpStatus} from "../config/http.status";
+import {UserRepository} from "../../infrastructure/persistance/user.repository";
+import {JWT_SECRET_KEY} from "../config/jwt.config";
+import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 
 /**
  * @class - controller for users
@@ -112,7 +112,7 @@ export class UserController {
     async loginUser(req: Request, res: Response): Promise<void> {
         const { nickname, password } = req.body;
         const user = await this.userService.getUserByNickname(nickname);
-        const isValidCredentials = await new UserRepositoryPostgres().isValidUser(nickname, password);
+        const isValidCredentials = await new UserRepository().isValidUser(nickname, password);
         if(user && isValidCredentials) {
             const token = jwt.sign({id: user.id, role: user.role}, JWT_SECRET_KEY, {expiresIn: '24h'});
             res.status(HttpStatus.OK).json({token});

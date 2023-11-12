@@ -15,4 +15,5 @@ export interface IUserModel {
     updated_at?:Date;
     deleted_at?:Date | null;
     is_deleted?:boolean;
+    rating?: number;
 }
