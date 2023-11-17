@@ -4,11 +4,9 @@ import {AWSPresignedUrlOperations} from "../../../application/enums/aws.operatio
 
 export class AwsAvatarService {
     private s3: AWS.S3;
-    // private lambda: AWS.Lambda;
 
     constructor() {
         this.s3 = s3;
-        // this.lambda = lambda;
     }
 
     async generatePresignedUrl(key: string) {
@@ -27,17 +25,4 @@ export class AwsAvatarService {
         const data = await this.s3.getObject(params).promise();
         return data.Body;
     }
-
-    // async getKeyFromLambda() {
-    //     try {
-    //         const res = await this.lambda.invoke(AWSLambdaParams).promise();
-    //
-    //         // @ts-ignore
-    //         const payload = JSON.parse(res.Payload);
-    //         return res.Payload.key;
-    //     }
-    //     catch (error) {
-    //         throw error;
-    //     }
-    // }
 }

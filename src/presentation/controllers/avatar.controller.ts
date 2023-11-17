@@ -26,7 +26,6 @@ export class AvatarController {
                     [RequestHeaders.ContentType]: mimetype,
                 },
             });
-            // const extractedKey = await this.awsAvatarService.getKeyFromLambda();
 
             // @ts-ignore
             await this.avatarService.uploadAvatar(userId, key);

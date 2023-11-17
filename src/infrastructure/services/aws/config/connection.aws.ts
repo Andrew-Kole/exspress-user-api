@@ -6,7 +6,6 @@ const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
 const AWS_REGION = process.env.AWS_REGION || '';
 export const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || '';
-// const AWS_LAMBDA_NAME = process.env.AWS_LAMBDA_NAME || '';
 
 // noinspection JSDeprecatedSymbols
 const AWSConnectionParams = {
@@ -20,10 +19,4 @@ export const AWSPresignedUrlParams = {
     Expires: 300,
 }
 
-// export const AWSLambdaParams = {
-//     FunctionName: AWS_LAMBDA_NAME,
-//     InvocationType: 'Event',
-// }
-
 export const s3 = new AWS.S3(AWSConnectionParams);
-// export const lambda = new AWS.Lambda(AWSConnectionParams);
