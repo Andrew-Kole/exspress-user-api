@@ -26,18 +26,11 @@ export class AvatarController {
                     [RequestHeaders.ContentType]: mimetype,
                 },
             });
+            // const extractedKey = await this.awsAvatarService.getKeyFromLambda();
 
-            const message = await this.awsAvatarService.receiveAndDeleteFromSQS();
-
-            if (message) {
-                const fileKey = JSON.parse(message)
-                await this.avatarService.uploadAvatar(userId, fileKey.key);
-                res.status(HttpOperationEnums.CREATED).json(key);
-            }
-            else {
-                res.status(HttpOperationEnums.BAD_REQUEST).json({ message: "Error uploading file" });
-                return;
-            }
+            // @ts-ignore
+            await this.avatarService.uploadAvatar(userId, key);
+            res.status(HttpOperationEnums.CREATED).json(key);
         }
         catch (error) {
             // @ts-ignore

@@ -1,28 +1,29 @@
-// The following code was deployed to aws lambda. Trigger is S3 on creating file
-
-const AWS = require("aws-sdk");
-
-const sqs = new AWS.SQS();
-
 exports.handler = async (event) => {
-    try {
-        const record = event.Records[0];
-        const key = record.s3.object.key;
+    try{
+        console.log('Received event:', JSON.stringify(event, null, 2));
+        if (event.Records && event.Records.length > 0) {
+            const s3Record = event.Records[0];
+            const key  = s3Record.s3.object.key;
+            console.log('Key extracted', key);
 
-        await sendSqsMessage(key);
-        console.log(`SQS message sent for key: ${key}`);
-        return {statusCode: 200, body: 'SQS message sent'};
+            return {
+                statusCode: 200,
+                body: JSON.stringify({key}),
+            };
+        }
+        else {
+            console.warn('No records');
+            return {
+                statusCode: 204,
+                body: JSON.stringify({message: 'No records'}),
+            };
+        }
     }
     catch (error) {
-        console.error('Error to handle event', error);
-        return {statusCode: 500, body: 'Error'};
+        console.error(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({error: error.message}),
+        }
     }
 };
-
-async function sendSqsMessage(key) {
-    const sqsParams = {
-        QueueUrl: process.env.AWS_SQS_QUEUE_URL,
-        MessageBody: JSON.stringify({key}),
-    }
-    await sqs.sendMessage(sqsParams).promise();
-}
