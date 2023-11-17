@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {avatarUploadSchema} from "../../application/validators/schemas/validation.schemas";
 import {AwsAvatarService} from "../../infrastructure/services/aws/aws.avatar.service";
 import {AvatarService} from "../../domain/services/avatar.service";
-import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
+import {HttpMessage, HttpOperationEnums, RequestHeaders} from "../../application/enums/http.operation.enums";
 import axios from "axios";
 
 export class AvatarController {
@@ -23,7 +23,7 @@ export class AvatarController {
 
             await axios.put(presignedUrl, buffer, {
                 headers: {
-                    'Content-Type': mimetype,
+                    [RequestHeaders.ContentType]: mimetype,
                 },
             });
 
@@ -32,16 +32,16 @@ export class AvatarController {
             if (message) {
                 const fileKey = JSON.parse(message)
                 await this.avatarService.uploadAvatar(userId, fileKey.key);
-                res.status(HttpStatus.CREATED).json(key);
+                res.status(HttpOperationEnums.CREATED).json(key);
             }
             else {
-                res.status(HttpStatus.BAD_REQUEST).json({ message: "Error uploading file" });
+                res.status(HttpOperationEnums.BAD_REQUEST).json({ message: "Error uploading file" });
                 return;
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message, data: req.file});
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message, data: req.file});
         }
     }
 
@@ -50,19 +50,19 @@ export class AvatarController {
         try {
             const key = await this.avatarService.getAvatarById(avatarId);
             if (!key) {
-                return res.status(HttpStatus.NOT_FOUND).json(HttpMessage.NOT_FOUND);
+                return res.status(HttpOperationEnums.NOT_FOUND).json(HttpMessage.NOT_FOUND);
             }
             const imageData = await this.awsAvatarService.getAvatar(key);
 
             if (!imageData) {
-                return res.status(HttpStatus.NOT_FOUND).json(HttpMessage.NOT_FOUND);
+                return res.status(HttpOperationEnums.NOT_FOUND).json(HttpMessage.NOT_FOUND);
             }
 
-            res.setHeader('Content-Type', 'image/jpeg');
+            res.setHeader(RequestHeaders.ContentType, 'image/jpeg');
             res.send(imageData);
         }
         catch (error) {
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(HttpMessage.NOT_FOUND);
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json(HttpMessage.NOT_FOUND);
         }
     }
 }

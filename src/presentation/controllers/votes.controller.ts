@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import {VotesService} from "../../domain/services/votes.service";
-import {HttpStatus} from "../../application/enums/http.status";
+import {HttpOperationEnums} from "../../application/enums/http.operation.enums";
 
 export class VotesController{
     constructor(private voteService: VotesService) {}
@@ -12,11 +12,11 @@ export class VotesController{
             const profileId = parseInt(req.params.id, 10);
             const {voteValue} = req.body;
             const vote = await this.voteService.createVote(voterId, profileId, voteValue);
-            res.status(HttpStatus.CREATED).json({vote})
+            res.status(HttpOperationEnums.CREATED).json({vote})
         }
         catch (error) {
             //@ts-ignore
-            res.status(HttpStatus.BAD_REQUEST).json({error: error.message})
+            res.status(HttpOperationEnums.BAD_REQUEST).json({error: error.message})
         }
     }
 
@@ -27,21 +27,21 @@ export class VotesController{
         // @ts-ignore
         const existingVoteValue = existingVote.vote_value;
         if (existingVoteValue === voteValue) {
-            res.status(HttpStatus.BAD_REQUEST).json({error: 'I didnot change anything'});
+            res.status(HttpOperationEnums.BAD_REQUEST).json({error: 'I didnot change anything'});
             return;
         }
         try {
             const updatedVote = await this.voteService.updateVote(voteId, voteValue);
             if (updatedVote) {
-                res.status(HttpStatus.OK).json(updatedVote);
+                res.status(HttpOperationEnums.OK).json(updatedVote);
             }
             else {
-                res.status(HttpStatus.BAD_REQUEST).json({error: 'Vote not found'});
+                res.status(HttpOperationEnums.BAD_REQUEST).json({error: 'Vote not found'});
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -49,11 +49,11 @@ export class VotesController{
         const voteId = parseInt(req.params.vote_id, 10);
         try{
             await this.voteService.deleteVote(voteId);
-            res.status(HttpStatus.NO_CONTENT).send();
+            res.status(HttpOperationEnums.NO_CONTENT).send();
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -61,11 +61,11 @@ export class VotesController{
         const voteId = parseInt(req.params.vote_id, 10);
         try{
             const vote = await this.voteService.getVoteById(voteId);
-            res.status(HttpStatus.OK).json(vote)
+            res.status(HttpOperationEnums.OK).json(vote)
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.BAD_REQUEST).json({error: error.message});
+            res.status(HttpOperationEnums.BAD_REQUEST).json({error: error.message});
         }
     }
 }

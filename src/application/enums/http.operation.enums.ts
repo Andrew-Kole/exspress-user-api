@@ -1,4 +1,4 @@
-export enum HttpStatus {
+export enum HttpOperationEnums {
     OK = 200,
     CREATED = 201,
     NO_CONTENT = 204,
@@ -15,4 +15,8 @@ export enum HttpMessage {
     FORBIDDEN = 'You have no right for this action',
     PRECONDITION_FAILED = 'Precondition failed',
     UNAUTHORIZED = 'You have to authorize.',
+}
+
+export enum RequestHeaders {
+    ContentType = 'Content-Type'
 }

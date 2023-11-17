@@ -1,22 +1,26 @@
 import AWS, {SQS} from "aws-sdk";
-import {AWS_S3_BUCKET_NAME, AWS_SQS_QUEUE_URL, AWSConnctionParams} from "./config/connection.aws";
+import {
+    AWS_S3_BUCKET_NAME,
+    AWS_SQS_QUEUE_URL,
+    AWSPresignedUrlParams, s3, sqs
+} from "./config/connection.aws";
+import {AWSPresignedUrlOperations} from "../../../application/enums/aws.operation.enums";
 
 export class AwsAvatarService {
     private s3: AWS.S3;
     private sqs: AWS.SQS;
 
     constructor() {
-        this.s3 = new AWS.S3(AWSConnctionParams);
-        this.sqs = new AWS.SQS(AWSConnctionParams);
+        this.s3 = s3;
+        this.sqs = sqs;
     }
 
     async generatePresignedUrl(key: string) {
         const params = {
-            Bucket: AWS_S3_BUCKET_NAME,
+            ...AWSPresignedUrlParams,
             Key: key,
-            Expires: 300,
-        };
-        return this.s3.getSignedUrlPromise('putObject', params);
+        }
+        return this.s3.getSignedUrlPromise(AWSPresignedUrlOperations.PutObject, params);
     };
 
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { VotesRepository } from "../../../infrastructure/persistance/votes.repository";
-import {HttpMessage, HttpStatus} from "../../../application/enums/http.status";
+import {HttpMessage, HttpOperationEnums} from "../../../application/enums/http.operation.enums";
 
 export async function checkOwnership(req: Request, res: Response, next: NextFunction) {
     try {
@@ -14,11 +14,11 @@ export async function checkOwnership(req: Request, res: Response, next: NextFunc
             next();
         }
         else {
-            return res.status(HttpStatus.FORBIDDEN).json(HttpMessage.FORBIDDEN);
+            return res.status(HttpOperationEnums.FORBIDDEN).json(HttpMessage.FORBIDDEN);
         }
     }
     catch (error) {
         // @ts-ignore
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
+        res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message});
     }
 }

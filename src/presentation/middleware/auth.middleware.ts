@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import {JWT_SECRET_KEY} from "../config/jwt.config";
 import {UserRoles} from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
+import {HttpMessage, HttpOperationEnums} from "../../application/enums/http.operation.enums";
 
 /**
  * Middleware for auth
@@ -14,7 +14,7 @@ import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
 export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(HttpStatus.UNAUTHORIZED).json({message: HttpMessage.UNAUTHORIZED});
+        return res.status(HttpOperationEnums.UNAUTHORIZED).json({message: HttpMessage.UNAUTHORIZED});
     }
 
     try {
@@ -23,6 +23,6 @@ export async function jwtAuth(req: Request, res: Response, next: NextFunction) {
         next();
     }
     catch (error) {
-        res.status(HttpStatus.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
+        res.status(HttpOperationEnums.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
     }
 }
