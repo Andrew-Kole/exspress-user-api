@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRoles } from "../../domain/models/roles.enum";
-import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
+import {HttpMessage, HttpOperationEnums} from "../../application/enums/http.operation.enums";
 
 export function rolesMiddleware(allowedRoles: UserRoles[]){
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -10,7 +10,7 @@ export function rolesMiddleware(allowedRoles: UserRoles[]){
         const loggedInUserId = req.user.id;
         const userId = parseInt(req.params.id, 10);
         if(!allowedRoles.includes(loggedInUserRole) && userId !== loggedInUserId) {
-            return res.status(HttpStatus.FORBIDDEN).json({error: HttpMessage.FORBIDDEN});
+            return res.status(HttpOperationEnums.FORBIDDEN).json({error: HttpMessage.FORBIDDEN});
         }
         next();
     };

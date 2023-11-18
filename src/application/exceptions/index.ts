@@ -25,3 +25,10 @@ export class VotedRecentlyError extends Error {
         this.name = 'VotedRecentlyError';
     }
 }
+
+export class UploadError extends Error {
+    constructor() {
+        super('Upload failed');
+        this.name = 'UploadError';
+    }
+}

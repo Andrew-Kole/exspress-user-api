@@ -3,7 +3,7 @@ import { UserService } from "../../domain/services/user.service";
 import jwt from "jsonwebtoken";
 import {UserRepository} from "../../infrastructure/persistance/user.repository";
 import {JWT_SECRET_KEY} from "../config/jwt.config";
-import {HttpMessage, HttpStatus} from "../../application/enums/http.status";
+import {HttpMessage, HttpOperationEnums} from "../../application/enums/http.operation.enums";
 
 /**
  * @class - controller for users
@@ -21,11 +21,11 @@ export class UserController {
         try {
             const { nickname, firstname, lastname, password } = req.body;
             const user = await this.userService.createUser({ nickname, firstname, lastname, password });
-            res.status(HttpStatus.CREATED).json(user);
+            res.status(HttpOperationEnums.CREATED).json(user);
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.BAD_REQUEST).json({error: error.message});
+            res.status(HttpOperationEnums.BAD_REQUEST).json({error: error.message});
         }
     }
 
@@ -41,15 +41,15 @@ export class UserController {
             const user = await this.userService.getUserById(userId);
             if(user) {
                 res.setHeader('Last_Modified', user.updated_at?.toUTCString() || '');
-                res.status(HttpStatus.OK).json(user);
+                res.status(HttpOperationEnums.OK).json(user);
             }
             else {
-                res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
+                res.status(HttpOperationEnums.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -68,7 +68,7 @@ export class UserController {
             if (user){
                 // @ts-ignore
                 if (ifUnmodifiedSinceHeader && new Date(ifUnmodifiedSinceHeader) < user.updated_at){
-                    res.status(HttpStatus.PRECONDITION_FAILED).json({error: HttpMessage.PRECONDITION_FAILED});
+                    res.status(HttpOperationEnums.PRECONDITION_FAILED).json({error: HttpMessage.PRECONDITION_FAILED});
                 }
                 else {
                     const { nickname, firstname, lastname, password } = req.body;
@@ -79,20 +79,20 @@ export class UserController {
                         password,
                     });
                     if(updatedUser) {
-                        res.status(HttpStatus.OK).json(updatedUser);
+                        res.status(HttpOperationEnums.OK).json(updatedUser);
                     }
                     else {
-                        res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
+                        res.status(HttpOperationEnums.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
                     }
                 }
             }
             else {
-                res.status(HttpStatus.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
+                res.status(HttpOperationEnums.NOT_FOUND).json({error: HttpMessage.NOT_FOUND});
             }
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error:error.message });
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({ error:error.message });
         }
     }
 
@@ -101,11 +101,11 @@ export class UserController {
 
         try {
             await this.userService.deleteUser(userId);
-            res.status(HttpStatus.NO_CONTENT).send();
+            res.status(HttpOperationEnums.NO_CONTENT).send();
         }
         catch (error) {
             // @ts-ignore
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({error: error.message});
+            res.status(HttpOperationEnums.INTERNAL_SERVER_ERROR).json({error: error.message});
         }
     }
 
@@ -115,10 +115,10 @@ export class UserController {
         const isValidCredentials = await new UserRepository().isValidUser(nickname, password);
         if(user && isValidCredentials) {
             const token = jwt.sign({id: user.id, role: user.role}, JWT_SECRET_KEY, {expiresIn: '24h'});
-            res.status(HttpStatus.OK).json({token});
+            res.status(HttpOperationEnums.OK).json({token});
         }
         else {
-            res.status(HttpStatus.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
+            res.status(HttpOperationEnums.UNAUTHORIZED).json({error: HttpMessage.UNAUTHORIZED});
         }
     }
 }
