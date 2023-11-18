@@ -5,7 +5,7 @@ import Joi from "joi";
 export const validate = (schema: Joi.ObjectSchema) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await schema.validateAsync(req.body);
+            await schema.validateAsync(req.file || req.body);
             next();
         }
         catch (error) {
@@ -14,3 +14,4 @@ export const validate = (schema: Joi.ObjectSchema) => {
         }
     }
 }
+

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { VotesRepository } from "../../../infrastructure/persistance/votes.repository";
-import {HttpMessage, HttpOperationEnums} from "../../../application/enums/http.operation.enums";
+import { VotesRepository } from "../../infrastructure/persistance/votes.repository";
+import {HttpMessage, HttpOperationEnums} from "../../application/enums/http.operation.enums";
 
 export async function checkOwnership(req: Request, res: Response, next: NextFunction) {
     try {

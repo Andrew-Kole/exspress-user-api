@@ -1,9 +1,8 @@
-import { Request, Response } from "express";
-import {avatarUploadSchema} from "../../application/validators/schemas/validation.schemas";
+import {Request, Response} from "express";
 import {AwsAvatarService} from "../../infrastructure/services/aws/aws.avatar.service";
 import {AvatarService} from "../../domain/services/avatar.service";
 import {HttpMessage, HttpOperationEnums, RequestHeaders} from "../../application/enums/http.operation.enums";
-import axios from "axios";
+
 
 export class AvatarController {
     private awsAvatarService: AwsAvatarService;
@@ -13,22 +12,8 @@ export class AvatarController {
     async uploadAvatar(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.id, 10);
         try {
-            // @ts-ignore
-            const { size, mimetype, originalname, buffer } = req.file;
-           await avatarUploadSchema.validateAsync({ avatar: { size, mimetype } });
-
-            // @ts-ignore
-            const key = `avatars/${originalname}`;
-            const presignedUrl =await this.awsAvatarService.generatePresignedUrl(key);
-
-            await axios.put(presignedUrl, buffer, {
-                headers: {
-                    [RequestHeaders.ContentType]: mimetype,
-                },
-            });
-
-            // @ts-ignore
-            await this.avatarService.uploadAvatar(userId, key);
+            //@ts-ignore
+            const key = await this.avatarService.uploadAvatar(userId, req.file);
             res.status(HttpOperationEnums.CREATED).json(key);
         }
         catch (error) {
